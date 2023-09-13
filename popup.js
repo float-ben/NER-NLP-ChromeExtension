@@ -52,6 +52,8 @@
   });
   
   */
+ /*
+ console.log("This is working!");
 
   document.addEventListener('DOMContentLoaded', function () {
     const wordInput = document.getElementById('wordInput');
@@ -59,18 +61,16 @@
   
     highlightButton.addEventListener('click', function () {
       const wordToHighlight = wordInput.value;
-  
+      console.log("Word to Highlight: " + wordToHighlight);
       // Get the current tab's URL
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        const currentTab = tabs[0];
-        const currentTabId = currentTab.id;
-  
-        // Send a message to the content script to scrape and highlight
-        chrome.scripting.executeScript({
-          target: { tabId: currentTabId },
-          function: scrapeAndHighlight,
-          args: [wordToHighlight]
-        });
+        //const currentTabId = tabs[0].id;
+        //const currentTabId = tabs[0].url;
+        const currentTabId = tabs[0].id;
+        console.log("URL: " + currentTabId);
+        // Send a message to the content script to highlight the word
+        chrome.tabs.sendMessage(currentTabId, { action: 'highlight', word: wordToHighlight });
+        console.log('Content script executed. #3');
       });
     });
   });
@@ -86,33 +86,77 @@
     // Replace the entire body content with the highlighted text
     document.body.innerHTML = highlightedText;
   }
-  
-  
-/*
-document.addEventListener('DOMContentLoaded', function () {
+  */
+  /*
+  document.addEventListener('DOMContentLoaded', function () {
     const wordInput = document.getElementById('wordInput');
     const highlightButton = document.getElementById('highlightButton');
+    const messageContainer = document.getElementById('messageContainer');
   
     highlightButton.addEventListener('click', function () {
       const wordToHighlight = wordInput.value;
   
-      // Send a POST request to your Flask server
-      fetch('http://localhost:5000/scrape', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ word: wordToHighlight }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Handle the response from the server, which contains the analyzed data
-        const analyzedData = data.result;
-        // Implement logic to display the analyzed data in your extension
-      })
-      .catch(error => {
-        console.error('Error:', error);
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        const currentTab = tabs[0];
+        const currentTabId = currentTab.id;
+  
+        // Inject the script directly into the current tab
+        chrome.scripting.executeScript({
+          target: { tabId: currentTabId },
+          function: highlightWords,
+          args: [wordToHighlight],
+        });
       });
     });
   });
-*/
+  
+  function highlightWords(wordToHighlight) {
+    const wordRegex = new RegExp(`\\b${wordToHighlight}\\b`, 'gi');
+    const elements = document.getElementsByTagName('*');
+  
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (element.nodeType === Node.TEXT_NODE) {
+        const text = element.nodeValue;
+        const replacedText = text.replace(wordRegex, match => `<span style="background-color: yellow;">${match}</span>`);
+        if (replacedText !== text) {
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = replacedText;
+          element.parentNode.replaceChild(wrapper.firstChild, element);
+        }
+      }
+    }
+  }
+  
+  */
+/*
+  document.addEventListener('DOMContentLoaded', function() {
+    const countButton = document.getElementById('countButton');
+  
+    countButton.addEventListener('click', function() {
+      const wordToCount = document.getElementById('wordInput').value;
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "countOccurrences", word: wordToCount }, function(response) {
+          const count = response.count;
+          console.log(`The word "${wordToCount}" appeared ${count} times on the webpage.`);
+        });
+      });
+    });
+  });
+  */
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const highlightAndCountButton = document.getElementById('highlightAndCountButton');
+  
+    highlightAndCountButton.addEventListener('click', function() {
+      const wordToHighlightAndCount = document.getElementById('wordInput').value;
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "highlightAndCount", word: wordToHighlightAndCount }, function(response) {
+          const count = response.count;
+          console.log(`The word "${wordToHighlightAndCount}" appeared ${count} times on the webpage.`);
+        });
+      });
+    });
+  });
+  
+  
