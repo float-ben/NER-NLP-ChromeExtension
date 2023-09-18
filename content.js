@@ -19,7 +19,9 @@
 });*/
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log("Youre Here");
   if (request.action === "highlightAndCount") {
+    console.log("Youre Here # 2");
     const wordToHighlight = request.word;
     const regex = new RegExp(wordToHighlight, 'gi');
     const textNodes = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);

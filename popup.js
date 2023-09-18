@@ -146,12 +146,24 @@
   */
 
   document.addEventListener('DOMContentLoaded', function() {
+    console.log("Youre Here #3");
     const highlightAndCountButton = document.getElementById('highlightAndCountButton');
   
     highlightAndCountButton.addEventListener('click', function() {
       const wordToHighlightAndCount = document.getElementById('wordInput').value;
+      console.log("word: " + wordToHighlightAndCount);
+      //const url = document.getElementById('urlInput').value;
+      //console.log("urlInput: " + url);
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "highlightAndCount", word: wordToHighlightAndCount }, function(response) {
+        console.log("urlInput: " + tabs[0].url);
+        /*chrome.runtime.sendMessage({ action: "sendURL", url: url }, function(response) {
+          console.log(`Sent URL to Python script: ${url}`);
+        });*/
+        chrome.runtime.sendMessage({ action: "sendURL", url: tabs[0].url }, function(response) {
+          console.log(`Sent URL to Python script: ${tabs[0].url}`);
+        });
+        
+        chrome.tabs.sendMessage(tabs[0].url, { action: "sendURL", url: tabs[0].url}, function(response) {
           const count = response.count;
           console.log(`The word "${wordToHighlightAndCount}" appeared ${count} times on the webpage.`);
         });

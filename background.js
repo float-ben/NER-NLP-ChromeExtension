@@ -8,3 +8,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
   });
   
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === "sendURL") {
+      const url = request.url;
+
+      // Send the URL to your Python script using native messaging
+      const port = chrome.runtime.connectNative('your_native_app_id');
+      port.postMessage({ url: url });
+      port.onDisconnect.addListener(function() {
+          console.log("Disconnected");
+      });
+  }
+});
