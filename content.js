@@ -18,6 +18,8 @@
   }
 });*/
 
+console.log("Content script is running");
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log("Youre Here");
   if (request.action === "highlightAndCount") {
@@ -45,6 +47,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
 
     sendResponse({ count });
+    //return { count };
   }
 });
 

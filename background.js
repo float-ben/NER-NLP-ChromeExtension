@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
   });
   
-
+/*
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === "sendURL") {
       const url = request.url;
@@ -21,3 +21,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
   }
 });
+*/

@@ -1,3 +1,4 @@
+'''
 import spacy
 import requests
 from bs4 import BeautifulSoup
@@ -23,7 +24,7 @@ def write_message(message):
     sys.stdout.buffer.write(len(message_text).to_bytes(4, byteorder='little'))
     sys.stdout.buffer.write(message_text.encode('utf-8'))
     sys.stdout.flush()
-
+'''
 '''
 if __name__ == "__main__":
     while True:
@@ -33,7 +34,7 @@ if __name__ == "__main__":
             # Do something with the URL, e.g., fetch the webpage
             print(f"Received URL from extension: {url}")
 '''
-
+'''
 
 # Load a spaCy language model with NER capabilities
 nlp = spacy.load("en_core_web_sm")
@@ -108,6 +109,75 @@ highlighted_text = highlight_entities(doc)
 # Print or use the highlighted text
 print(highlighted_text)
 
+'''
+
+import spacy
+import requests
+from bs4 import BeautifulSoup
+from spacy.matcher import PhraseMatcher
+import sys
+import json
+
+print("You're Here")
+
+# Read a message from Chrome's extension
+def read_message():
+    raw_length = sys.stdin.buffer.read(4)
+    if not raw_length:
+        sys.exit(0)
+    message_length = int.from_bytes(raw_length, byteorder='little')
+    message_text = sys.stdin.buffer.read(message_length).decode('utf-8')
+    return json.loads(message_text)
+
+# Write a message to Chrome's extension
+def write_message(message):
+    message_text = json.dumps(message)
+    sys.stdout.buffer.write(len(message_text).to_bytes(4, byteorder='little'))
+    sys.stdout.buffer.write(message_text.encode('utf-8'))
+    sys.stdout.flush()
+
+# Load a spaCy language model with NER capabilities
+nlp = spacy.load("en_core_web_sm")
+
+# Initialize the PhraseMatcher for custom patterns (optional)
+matcher = PhraseMatcher(nlp.vocab)
+
+# URL of the web page to scrape (received from Chrome extension)
+#message = read_message()
+if 'action' in message and message['action'] == 'sendURL' and 'url' in message:
+    url = message['url']
+    print("Python in URL: ", url)
+#if 'url' in message:
+ #   url = message['url']
+
+# Make a request to the web page and extract text content
+    response = requests.get(url)
+    html_content = response.text
+
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    # Extract text from the parsed HTML
+    web_text = soup.get_text()
+
+    # Process the extracted text using spaCy
+    doc = nlp(web_text)
+
+    # Define custom patterns for the PhraseMatcher (optional)
+    # You can add custom phrases you want to match in addition to NER entities
+    custom_phrases = ["example phrase 1", "example phrase 2"]
+    pattern_docs = [nlp(phrase) for phrase in custom_phrases]
+    matcher.add("custom_phrases", pattern_docs)
+
+    # ... (Rest of your NLP processing logic here)
+
+    # For example, you can highlight entities in the processed text and send the result back to the extension
+    highlighted_text = highlight_entities(doc)
+
+    # Send the result back to the Chrome extension
+    write_message({"highlighted_text": highlighted_text})
+    
+print("Python script completed.")
 
 
 
